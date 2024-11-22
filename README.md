@@ -198,3 +198,116 @@ Vehicle Class	EV Registration	Total Registration	Percent share
 ### Inference:
 - The Two wheeler(NT) as previously stated has the highest EV registrations with 3 wheelers(T) following.
 - Three wheeler(T) however, as a category has the highest percentage of EVs manufactured/registered to-date followed by TWO WHEELER(T)
+
+## Prediction of manufacturing numbers and the vehicle class
+1. Looking at the numbers, EV market can be capitalized by increasing the production numbers of TWO WHEELER(NT)
+
+1. With increasing LMVs, this category could be utilized as well to expand the market horizon.
+
+1. Other categories with focus should be TWO WHEELER(T) and THREE WHEELER(T).
+
+### Predictions for LMV
+```python
+category_specific = ev_cat.groupby('Year').sum()[['LIGHT GOODS VEHICLE', 'LIGHT MOTOR VEHICLE', 'THREE WHEELER(T)','TWO WHEELER(NT)', 'TWO WHEELER(T)']]
+
+
+# 2024 has data only till August which is only a partial information so, considering complete data year
+category_specific['LIGHT MOTOR VEHICLE'].index <= 2023
+
+from scipy.optimize import curve_fit
+
+# filter the dataset to include years with complete data, assuming 2023 is the last complete year
+filtered_years = category_specific['LIGHT MOTOR VEHICLE'][category_specific['LIGHT MOTOR VEHICLE'].index <= 2023]
+
+# define a function for exponential growth to fit the data
+def exp_growth(x, a, b):
+    return a * np.exp(b * x)
+
+# prepare the data for curve fitting
+x_data = filtered_years.index - filtered_years.index.min()
+y_data = filtered_years.values
+
+# fit the data to the exponential growth function
+params, covariance = curve_fit(exp_growth, x_data, y_data)
+
+# use the fitted function to forecast the number of EVs for 2024 and the next ten years
+forecast_years = np.arange(2024, 2024 + 10) - filtered_years.index.min()
+forecasted_values = exp_growth(forecast_years, *params)
+
+# create a dictionary to display the forecasted values for easier interpretation
+forecasted_evs = dict(zip(forecast_years + filtered_years.index.min(), forecasted_values))
+
+print(forecasted_evs)
+
+{2024: 175297.2235062509, 2025: 416174.7357889515, 2026: 988044.2327874522, 2027: 2345724.8169903485, 2028: 5569006.66432824, 2029: 13221429.471477449, 2030: 31389116.19354994, 2031: 74521186.80039199, 2032: 176921428.685528, 2033: 420030776.10626346}
+
+
+# prepare data for plotting
+years = np.arange(filtered_years.index.min(), 2033 + 1)
+actual_years = filtered_years.index
+forecast_years_full = np.arange(2024, 2033 + 1)
+
+# actual and forecasted values
+actual_values = filtered_years.values
+forecasted_values_full = [forecasted_evs[year] for year in forecast_years_full]
+
+plt.figure(figsize=(12, 8))
+plt.plot(actual_years, actual_values, 'bo-', label='Actual Registrations')
+plt.plot(forecast_years_full, forecasted_values_full, 'ro--', label='Forecasted Registrations')
+
+plt.title('Current & Estimated LMV EV Market')
+plt.xlabel('Year')
+plt.ylabel('Number of EV Registrations')
+plt.legend()
+plt.grid(True)
+
+plt.show()
+```
+![download](https://github.com/user-attachments/assets/b2bd75e4-96fd-45c5-9dee-19990adb00de)
+
+
+### Predictions for 2W(NT)
+```python
+filtered_years_2w = category_specific['TWO WHEELER(NT)'][category_specific['TWO WHEELER(NT)'].index <= 2023]
+
+# prepare the data for curve fitting
+x_data = filtered_years_2w.index - filtered_years_2w.index.min()
+y_data = filtered_years_2w.values
+
+# fit the data to the exponential growth function
+params, covariance = curve_fit(exp_growth, x_data, y_data)
+
+# use the fitted function to forecast the number of EVs for 2024 and the next five years
+forecast_years_2w = np.arange(2024, 2024 + 10) - filtered_years_2w.index.min()
+forecasted_values_2w = exp_growth(forecast_years_2w, *params)
+
+# create a dictionary to display the forecasted values for easier interpretation
+forecasted_evs_2w = dict(zip(forecast_years_2w + filtered_years_2w.index.min(), forecasted_values_2w))
+
+print(forecasted_evs_2w)
+
+{2024: 1804738.3513997972, 2025: 3580417.2697123555, 2026: 7103183.580773072, 2027: 14091993.525161844, 2028: 27957081.39245217, 2029: 55464005.04574611, 2030: 110034942.93739386, 2031: 218298131.50437358, 2032: 433081282.6014201, 2033: 859189201.6993011}
+
+
+years = np.arange(filtered_years_2w.index.min(), 2033 + 1)
+actual_years = filtered_years_2w.index
+forecast_years_full = np.arange(2024, 2033 + 1)
+
+# actual and forecasted values
+actual_values = filtered_years_2w.values
+forecasted_values_full = [forecasted_evs_2w[year] for year in forecast_years_full]
+
+plt.figure(figsize=(12, 8))
+plt.plot(actual_years, actual_values, 'bo-', label='Actual Registrations')
+plt.plot(forecast_years_full, forecasted_values_full, 'ro--', label='Forecasted Registrations')
+
+plt.title('Current & Estimated 2W(NT) EV Market')
+plt.xlabel('Year')
+plt.ylabel('Number of EV Registrations')
+plt.legend()
+plt.grid(True)
+
+plt.show()
+```
+![download (1)](https://github.com/user-attachments/assets/46432777-1606-4e7e-90d8-fe49ef691689)
+
