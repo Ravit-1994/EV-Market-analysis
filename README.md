@@ -311,3 +311,44 @@ plt.show()
 ```
 ![download (1)](https://github.com/user-attachments/assets/46432777-1606-4e7e-90d8-fe49ef691689)
 
+
+### Predictions for 3W(T)
+```python
+filtered_years_3w = category_specific['THREE WHEELER(T)'][category_specific['THREE WHEELER(T)'].index <= 2023]
+
+# prepare the data for curve fitting
+x_data = filtered_years_3w.index - filtered_years.index.min()
+y_data = filtered_years_3w.values
+
+# fit the data to the exponential growth function
+params, covariance = curve_fit(exp_growth, x_data, y_data)
+
+# use the fitted function to forecast the number of EVs for 2024 and the next five years
+forecast_years_3w = np.arange(2024, 2024 + 10) - filtered_years_3w.index.min()
+forecasted_values_3w = exp_growth(forecast_years_3w, *params)
+
+# create a dictionary to display the forecasted values for easier interpretation
+forecasted_evs_3w = dict(zip(forecast_years_3w + filtered_years_3w.index.min(), forecasted_values_3w))
+
+
+years = np.arange(filtered_years_3w.index.min(), 2033 + 1)
+actual_years = filtered_years_3w.index
+forecast_years_full = np.arange(2024, 2033 + 1)
+
+# actual and forecasted values
+actual_values = filtered_years_3w.values
+forecasted_values_full = [forecasted_evs_3w[year] for year in forecast_years_full]
+
+plt.figure(figsize=(12, 8))
+plt.plot(actual_years, actual_values, 'bo-', label='Actual Registrations')
+plt.plot(forecast_years_full, forecasted_values_full, 'ro--', label='Forecasted Registrations')
+
+plt.title('Current & Estimated 2W(NT) EV Market')
+plt.xlabel('Year')
+plt.ylabel('Number of EV Registrations')
+plt.legend()
+plt.grid(True)
+
+plt.show()
+```
+![download (2)](https://github.com/user-attachments/assets/955589dd-08ca-4e94-ae6c-d362a5653e0a)
